@@ -1,6 +1,8 @@
 import { memo } from 'react'
 import type { PriceData } from '../types'
 import { formatPrice, timeAgo } from '../utils/format'
+import { Sparkline } from './Sparkline'
+import { useSparkline } from '../hooks/useSparkline'
 
 const SOURCE_COLORS: Record<string, string> = {
   chainlink: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30',
@@ -20,6 +22,7 @@ interface PriceCardProps {
 
 export const PriceCard = memo(function PriceCard({ price, onClick, isLive, isStale, hasAlert, onAlertClick }: PriceCardProps) {
   const confidencePct = (price.confidence * 100).toFixed(1)
+  const history = useSparkline(price.assetPair, 24)
 
   return (
     <div
@@ -51,6 +54,17 @@ export const PriceCard = memo(function PriceCard({ price, onClick, isLive, isSta
 
       <div className="text-3xl font-bold text-gray-900 dark:text-white mb-3 font-mono tracking-tight">
         ${formatPrice(price.price)}
+      </div>
+
+      {/* Sparkline chart */}
+      <div className="mb-3">
+        <Sparkline
+          history={history}
+          points={24}
+          width={220}
+          height={36}
+          className="w-full"
+        />
       </div>
 
       <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 mb-3">

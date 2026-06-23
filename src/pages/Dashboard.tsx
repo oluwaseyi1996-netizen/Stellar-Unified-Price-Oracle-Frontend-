@@ -11,6 +11,7 @@ import { AlertBadge } from '../components/AlertBadge'
 import { ConnectionBadge } from '../components/ConnectionBadge'
 import { NetworkStatusBanner } from '../components/NetworkStatusBanner'
 import { FilterBar } from '../components/FilterBar'
+import { parseSearch, matchesParsedSearch } from '../utils/searchParser'
 import type { AlertFormData } from '../types'
 
 const ROW_HEIGHT = 200
@@ -50,19 +51,20 @@ export function Dashboard() {
   const filtered = useMemo(() => {
     let result = merged
 
-    // Search filter
+    // Advanced search parser (supports operators: source:x confidence:>n price:<n updated:<5m)
     if (search) {
-      result = result.filter((p) => p.assetPair.toLowerCase().includes(search.toLowerCase()))
+      const parsed = parseSearch(search)
+      result = result.filter((p) => matchesParsedSearch(p, parsed))
     }
 
-    // Confidence filter
+    // Confidence dropdown filter (legacy, still supported)
     if (confidence === 'high') {
-      result = result.filter((p) => p.confidence > 80)
+      result = result.filter((p) => p.confidence > 0.8)
     } else if (confidence === 'medium') {
-      result = result.filter((p) => p.confidence > 50)
+      result = result.filter((p) => p.confidence > 0.5)
     }
 
-    // Source filter
+    // Source dropdown filter
     if (source !== 'all') {
       result = result.filter((p) => p.sources.some((s) => s.toLowerCase() === source.toLowerCase()))
     }

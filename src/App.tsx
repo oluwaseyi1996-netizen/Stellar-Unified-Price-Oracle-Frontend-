@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { Dashboard } from './pages/Dashboard'
 import { NotFound } from './pages/NotFound'
 import { useWebVitals } from './hooks/useWebVitals'
+import { useAccessibility } from './hooks/useAccessibility'
 import { PreferencesProvider } from './preferences/PreferencesContext'
 
 const PriceDetail = lazy(() =>
@@ -23,6 +24,7 @@ const BASENAME = import.meta.env.BASE_URL.replace(/\/$/, '')
 
 function AppContent() {
   const location = useLocation()
+  useAccessibility()
   return (
     <ErrorBoundary key={location.key}>
       <PreferencesProvider>
