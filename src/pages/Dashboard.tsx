@@ -38,7 +38,7 @@ export function Dashboard() {
 
   const virtualizer = useVirtualizer({
     count: rowCount,
-    getScrollElement: useCallback(() => window, []),
+    getScrollElement: useCallback(() => document.documentElement, []),
     estimateSize: useCallback(() => ROW_HEIGHT, []),
     overscan: 5,
   })
