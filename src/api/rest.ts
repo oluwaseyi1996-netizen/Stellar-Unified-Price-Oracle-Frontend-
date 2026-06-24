@@ -1,6 +1,6 @@
 import { config } from '../config'
 import { fetchWithRetry } from './retry'
-import type { PriceData, PriceHistoryResponse } from '../types'
+import type { PriceData, PriceHistoryResponse, RateLimitInfo } from '../types'
 import { idbCache } from '../hooks/useIndexedDB'
 import {
   PriceDataSchema,
