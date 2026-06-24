@@ -3,12 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Dashboard } from './pages/Dashboard'
-import { PriceDetail } from './pages/PriceDetail'
 import { NotFound } from './pages/NotFound'
-
-const PriceDetail = lazy(() =>
-  import('./pages/PriceDetail').then((m) => ({ default: m.PriceDetail })),
-)
 import { useWebVitals } from './hooks/useWebVitals'
 import { useAccessibility } from './hooks/useAccessibility'
 import { AlertsProvider } from './hooks/useAlerts'
@@ -18,7 +13,14 @@ import { ToastContainer } from './components/ToastContainer'
 import { AnalyticsProvider } from './context/AnalyticsContext'
 import { AnalyticsConsentBanner } from './components/AnalyticsConsentBanner'
 import { AnalyticsCollector } from './utils/analytics'
+import { usePriceContext } from './context/PriceContext'
+import { useObservability } from './observability/hooks/useObservability'
+import { ObservabilityDashboard } from './observability/ui/ObservabilityDashboard'
 import { config } from './config'
+
+const PriceDetail = lazy(() =>
+  import('./pages/PriceDetail').then((m) => ({ default: m.PriceDetail })),
+)
 
 const BASENAME = import.meta.env.BASE_URL.replace(/\/$/, '')
 
@@ -31,25 +33,15 @@ function AppContent() {
   const location = useLocation()
   return (
     <ErrorBoundary key={location.key}>
-      <PreferencesProvider>
-        <Layout>
-          <Suspense fallback={null}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/price/:pair" element={<PriceDetail />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-        <AlertsProvider>
+      <AlertsProvider>
+        <PreferencesProvider>
           <AccessibilityAwareLayout />
-        </AlertsProvider>
-      </PreferencesProvider>
+        </PreferencesProvider>
+      </AlertsProvider>
     </ErrorBoundary>
   )
 }
 
-// Observability overlay lives inside PriceProvider so it can access wsStatus
 function ObservabilityOverlay() {
   const [visible, setVisible] = useState(false)
   const { wsStatus, refetchPrices, pricesError } = usePriceContext()
@@ -62,7 +54,6 @@ function ObservabilityOverlay() {
     refetchState: refetchPrices,
   })
 
-  // Ctrl+Shift+O toggles the observability panel (#117 requirement)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'O') {
@@ -83,15 +74,20 @@ function ObservabilityOverlay() {
       healingHistory={healingHistory}
       onForceHeal={forceHeal}
     />
+  )
+}
+
 function AccessibilityAwareLayout() {
   useAccessibility()
   return (
     <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/price/:pair" element={<PriceDetail />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/price/:pair" element={<PriceDetail />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </Layout>
   )
 }
@@ -106,6 +102,7 @@ export default function App() {
           <AppContent />
           <ToastContainer />
           <AnalyticsConsentBanner />
+          <ObservabilityOverlay />
         </AnalyticsProvider>
       </ToastProvider>
     </BrowserRouter>
