@@ -17,11 +17,11 @@ function AppContent() {
   const location = useLocation()
   return (
     <ErrorBoundary key={location.key}>
-      <PreferencesProvider>
-        <AlertsProvider>
+      <AlertsProvider>
+        <PreferencesProvider>
           <AccessibilityAwareLayout />
-        </AlertsProvider>
-      </PreferencesProvider>
+        </PreferencesProvider>
+      </AlertsProvider>
     </ErrorBoundary>
   )
 }
